@@ -4,6 +4,8 @@
 
 ---
 
+![Alt text](https://github.com/theMethodolojeeOrg/Predicate-Logging/blob/main/WhichOneTellsYouWhatToFix.png?raw=true "Optional title")
+
 ## The Problem: The Catastrophic 200
 
 Modern distributed systems fail silently with technical success masking semantic failure:
