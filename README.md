@@ -5,7 +5,7 @@
 ---
 ## Demo
 
-<iframe src="index.html" width="100%" height="600px" frameborder="0"></iframe>
+<iframe src="https://www.perplexity.ai/apps/bb9961b6-6892-41f7-9a32-b88ca9cbf5a2" width="100%" height="600px" frameborder="0"></iframe>
 
 ## The Problem: The Catastrophic 200
 
