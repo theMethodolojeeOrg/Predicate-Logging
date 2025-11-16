@@ -3,6 +3,9 @@
 **A formal logic system for runtime state validation that transforms logs from debug noise into self-validating proof trees.**
 
 ---
+## Demo
+
+<iframe src="index.html" width="100%" height="600px" frameborder="0"></iframe>
 
 ## The Problem: The Catastrophic 200
 

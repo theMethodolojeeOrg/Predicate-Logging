@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predicate Logging Demo: Logs as Proof Trees</title>
+    <style>
+        :root {
+  /* Primitive Color Tokens */
+  --color-white: rgba(255, 255, 255, 1);
+  --color-black: rgba(0, 0, 0, 1);
+  --color-cream-50: rgba(252, 252, 249, 1);
+  --color-cream-100: rgba(255, 255, 253, 1);
+  --color-gray-200: rgba(245, 245, 245, 1);
+  --color-gray-300: rgba(167, 169, 169, 1);
+  --color-gray-400: rgba(119, 124, 124, 1);
+  --color-slate-500: rgba(98, 108, 113, 1);
+  --color-brown-600: rgba(94, 82, 64, 1);
+  --color-charcoal-700: rgba(31, 33, 33, 1);
+  --color-charcoal-800: rgba(38, 40, 40, 1);
+  --color-slate-900: rgba(19, 52, 59, 1);
+  --color-teal-300: rgba(50, 184, 198, 1);
+  --color-teal-400: rgba(45, 166, 178, 1);
+  --color-teal-500: rgba(33, 128, 141, 1);
+  --color-teal-600: rgba(29, 116, 128, 1);
+  --color-teal-700: rgba(26, 104, 115, 1);
+  --color-teal-800: rgba(41, 150, 161, 1);
+  --color-red-400: rgba(255, 84, 89, 1);
+  --color-red-500: rgba(192, 21, 47, 1);
+  --color-orange-400: rgba(230, 129, 97, 1);
+  --color-orange-500: rgba(168, 75, 47, 1);
+
+  /* RGB versions for opacity control */
+  --color-brown-600-rgb: 94, 82, 64;
+  --color-teal-500-rgb: 33, 128, 141;
+  --color-slate-900-rgb: 19, 52, 59;
+  --color-slate-500-rgb: 98, 108, 113;
+  --color-red-500-rgb: 192, 21, 47;
+  --color-red-400-rgb: 255, 84, 89;
+  --color-orange-500-rgb: 168, 75, 47;
+  --color-orange-400-rgb: 230, 129, 97;
+
+  /* Background color tokens (Light Mode) */
+  --color-bg-1: rgba(59, 130, 246, 0.08);
+  --color-bg-2: rgba(245, 158, 11, 0.08);
+  --color-bg-3: rgba(34, 197, 94, 0.08);
+  --color-bg-4: rgba(239, 68, 68, 0.08);
+  --color-bg-5: rgba(147, 51, 234, 0.08);
+  --color-bg-6: rgba(249, 115, 22, 0.08);
+  --color-bg-7: rgba(236, 72, 153, 0.08);
+  --color-bg-8: rgba(6, 182, 212, 0.08);
+
+  /* Semantic Color Tokens (Light Mode) */
+  --color-background: var(--color-cream-50);
+  --color-surface: var(--color-cream-100);
+  --color-text: var(--color-slate-900);
+  --color-text-secondary: var(--color-slate-500);
+  --color-primary: var(--color-teal-500);
+  --color-primary-hover: var(--color-teal-600);
+  --color-primary-active: var(--color-teal-700);
+  --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
+  --color-secondary-hover: rgba(var(--color-brown-600-rgb), 0.2);
+  --color-secondary-active: rgba(var(--color-brown-600-rgb), 0.25);
+  --color-border: rgba(var(--color-brown-600-rgb), 0.2);
+  --color-btn-primary-text: var(--color-cream-50);
+  --color-card-border: rgba(var(--color-brown-600-rgb), 0.12);
+  --color-card-border-inner: rgba(var(--color-brown-600-rgb), 0.12);
+  --color-error: var(--color-red-500);
+  --color-success: var(--color-teal-500);
+  --color-warning: var(--color-orange-500);
+  --color-info: var(--color-slate-500);
+  --color-focus-ring: rgba(var(--color-teal-500-rgb), 0.4);
+  --color-select-caret: rgba(var(--color-slate-900-rgb), 0.8);
+
+  /* Common style patterns */
+  --focus-ring: 0 0 0 3px var(--color-focus-ring);
+  --focus-outline: 2px solid var(--color-primary);
+  --status-bg-opacity: 0.15;
+  --status-border-opacity: 0.25;
+
+  /* Typography */
+  --font-family-base: "FKGroteskNeue", "Geist", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-family-mono: "Berkeley Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-base: 14px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 20px;
+  --font-size-3xl: 24px;
+  --font-size-4xl: 30px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 550;
+  --font-weight-bold: 600;
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --letter-spacing-tight: -0.01em;
+
+  /* Spacing */
+  --space-0: 0;
+  --space-1: 1px;
+  --space-2: 2px;
+  --space-4: 4px;
+  --space-6: 6px;
+  --space-8: 8px;
+  --space-10: 10px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-20: 20px;
+  --space-24: 24px;
+  --space-32: 32px;
+
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-base: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  --shadow-inset-sm: inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.03);
+
+  /* Animation */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Layout */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-gray-400-rgb: 119, 124, 124;
+    --color-teal-300-rgb: 50, 184, 198;
+    --color-gray-300-rgb: 167, 169, 169;
+    --color-gray-200-rgb: 245, 245, 245;
+    --color-bg-1: rgba(29, 78, 216, 0.15);
+    --color-bg-2: rgba(180, 83, 9, 0.15);
+    --color-bg-3: rgba(21, 128, 61, 0.15);
+    --color-bg-4: rgba(185, 28, 28, 0.15);
+    --color-bg-5: rgba(107, 33, 168, 0.15);
+    --color-bg-6: rgba(194, 65, 12, 0.15);
+    --color-bg-7: rgba(190, 24, 93, 0.15);
+    --color-bg-8: rgba(8, 145, 178, 0.15);
+    --color-background: var(--color-charcoal-700);
+    --color-surface: var(--color-charcoal-800);
+    --color-text: var(--color-gray-200);
+    --color-text-secondary: rgba(var(--color-gray-300-rgb), 0.7);
+    --color-primary: var(--color-teal-300);
+    --color-primary-hover: var(--color-teal-400);
+    --color-primary-active: var(--color-teal-800);
+    --color-secondary: rgba(var(--color-gray-400-rgb), 0.15);
+    --color-secondary-hover: rgba(var(--color-gray-400-rgb), 0.25);
+    --color-secondary-active: rgba(var(--color-gray-400-rgb), 0.3);
+    --color-border: rgba(var(--color-gray-400-rgb), 0.3);
+    --color-error: var(--color-red-400);
+    --color-success: var(--color-teal-300);
+    --color-warning: var(--color-orange-400);
+    --color-info: var(--color-gray-300);
+    --color-focus-ring: rgba(var(--color-teal-300-rgb), 0.4);
+    --color-btn-primary-text: var(--color-slate-900);
+    --color-card-border: rgba(var(--color-gray-400-rgb), 0.2);
+    --color-card-border-inner: rgba(var(--color-gray-400-rgb), 0.15);
+    --shadow-inset-sm: inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+    --color-success-rgb: var(--color-teal-300-rgb);
+    --color-error-rgb: var(--color-red-400-rgb);
+    --color-warning-rgb: var(--color-orange-400-rgb);
+    --color-info-rgb: var(--color-gray-300-rgb);
+  }
+}
+
+@font-face {
+  font-family: 'FKGroteskNeue';
+  src: url('https://r2cdn.perplexity.ai/fonts/FKGroteskNeue.woff2') format('woff2');
+}
+
+html {
+  font-size: var(--font-size-base);
+  font-family: var(--font-family-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text);
+  background-color: var(--color-background);
+  -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+/* GitHub Header */
+.gh-header {
+  background: #24292f;
+  color: #ffffff;
+  padding: var(--space-16);
+  border-bottom: 1px solid #373e47;
+}
+
+@media (prefers-color-scheme: dark) {
+  .gh-header {
+    background: #161b22;
+    border-bottom-color: #30363d;
+  }
+}
+
+.gh-header-content {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+}
+
+.gh-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.gh-org {
+  color: #ffffff;
+  opacity: 0.9;
+}
+
+.gh-separator {
+  color: #8b949e;
+  font-weight: var(--font-weight-normal);
+}
+
+.gh-repo {
+  color: #58a6ff;
+  font-weight: var(--font-weight-bold);
+}
+
+.gh-header-right {
+  display: flex;
+  gap: var(--space-12);
+  align-items: center;
+}
+
+.gh-link {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-6) var(--space-12);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: #ffffff;
+  text-decoration: none;
+  border: 1px solid rgba(240, 246, 252, 0.1);
+  transition: all var(--duration-fast) var(--ease-standard);
+}
+
+.gh-link:hover {
+  background: rgba(177, 186, 196, 0.12);
+  border-color: #8b949e;
+}
+
+.gh-link-primary {
+  background: #238636;
+  border-color: rgba(240, 246, 252, 0.1);
+  color: #ffffff;
+}
+
+.gh-link-primary:hover {
+  background: #2ea043;
+}
+
+/* Tagline Banner */
+.gh-tagline {
+  background: linear-gradient(135deg, #1a7f37 0%, #238636 100%);
+  color: #ffffff;
+  text-align: center;
+  padding: var(--space-12) var(--space-16);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.gh-tagline p {
+  margin: 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  font-style: italic;
+  letter-spacing: 0.02em;
+}
+
+/* Hero Section */
+.hero {
+  text-align: center;
+  padding: var(--space-32) var(--space-16);
+  background: var(--color-background);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.hero h1 {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 var(--space-12) 0;
+  color: var(--color-text);
+}
+
+.hero h2 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  margin: 0 0 var(--space-16) 0;
+  color: #0969da;
+}
+
+@media (prefers-color-scheme: dark) {
+  .hero h2 {
+    color: #58a6ff;
+  }
+}
+
+.hero p {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-32) var(--space-16);
+}
+
+/* Section */
+.section {
+  margin-bottom: var(--space-32);
+}
+
+.section-title {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-semibold);
+  margin: 0 0 var(--space-8) 0;
+  color: var(--color-text);
+  padding-bottom: var(--space-12);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.section-subtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-24) 0;
+}
+
+/* Scenario Runner */
+.scenario-selector {
+  display: flex;
+  gap: var(--space-12);
+  margin-bottom: var(--space-24);
+  flex-wrap: wrap;
+}
+
+.scenario-card {
+  flex: 1;
+  min-width: 280px;
+  padding: var(--space-16);
+  background: var(--color-surface);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-standard);
+  box-shadow: 0 1px 0 rgba(27, 31, 36, 0.04);
+}
+
+.scenario-card:hover {
+  border-color: #0969da;
+  box-shadow: 0 3px 8px rgba(9, 105, 218, 0.12);
+}
+
+.scenario-card.active {
+  border-color: #0969da;
+  background: rgba(9, 105, 218, 0.05);
+  box-shadow: 0 0 0 2px rgba(9, 105, 218, 0.2);
+}
+
+.scenario-card h3 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin: 0 0 var(--space-8) 0;
+  color: var(--color-text);
+}
+
+.scenario-card p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  gap: var(--space-12);
+  margin-bottom: var(--space-24);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-16);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-standard);
+  border: 1px solid;
+  text-decoration: none;
+  box-shadow: 0 1px 0 rgba(27, 31, 36, 0.04);
+}
+
+.btn--primary {
+  background: #2da44e;
+  color: #ffffff;
+  border-color: rgba(27, 31, 36, 0.15);
+}
+
+.btn--primary:hover {
+  background: #2c974b;
+  border-color: rgba(27, 31, 36, 0.15);
+}
+
+.btn--primary:active {
+  background: #298e46;
+  box-shadow: inset 0 1px 0 rgba(20, 70, 32, 0.2);
+}
+
+.btn--secondary {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+.btn--secondary:hover {
+  background: var(--color-secondary);
+  border-color: var(--color-border);
+}
+
+.form-control {
+  padding: var(--space-8) var(--space-12);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-family-base);
+  transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #0969da;
+  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.3);
+}
+
+@media (prefers-color-scheme: dark) {
+  .form-control:focus {
+    border-color: #58a6ff;
+    box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3);
+  }
+}
+
+select.form-control {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23586069' d='M6 9L1.5 4.5 2.561 3.439 6 6.878 9.439 3.439 10.5 4.5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-12) center;
+  background-size: 12px;
+  padding-right: var(--space-32);
+}
+
+@media (prefers-color-scheme: dark) {
+  select.form-control {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238b949e' d='M6 9L1.5 4.5 2.561 3.439 6 6.878 9.439 3.439 10.5 4.5z'/%3E%3C/svg%3E");
+  }
+}
+
+/* Output Panels */
+.output-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-16);
+  margin-bottom: var(--space-24);
+}
+
+@media (max-width: 768px) {
+  .output-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .gh-header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .gh-header-right {
+    width: 100%;
+    flex-direction: column;
+  }
+  
+  .gh-link {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.output-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(27, 31, 36, 0.12);
+}
+
+.output-panel-header {
+  padding: var(--space-12) var(--space-16);
+  background: #f6f8fa;
+  border-bottom: 1px solid var(--color-card-border-inner);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+}
+
+@media (prefers-color-scheme: dark) {
+  .output-panel-header {
+    background: #161b22;
+  }
+}
+
+.output-panel-body {
+  padding: var(--space-16);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Log Output */
+.log-output {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+}
+
+.log-line {
+  margin-bottom: var(--space-8);
+  padding: var(--space-8) var(--space-12);
+  border-radius: var(--radius-sm);
+  background: #f6f8fa;
+  border-left: 3px solid #0969da;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@media (prefers-color-scheme: dark) {
+  .log-line {
+    background: #161b22;
+    border-left-color: #58a6ff;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Proof Tree */
+.proof-tree {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+}
+
+.tree-node {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: var(--space-8);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.tree-node-indent {
+  display: inline-block;
+  width: 20px;
+}
+
+.tree-node-icon {
+  display: inline-block;
+  width: 20px;
+  font-weight: bold;
+  margin-right: var(--space-8);
+}
+
+.tree-node-icon.success {
+  color: #22c55e;
+}
+
+.tree-node-icon.failure {
+  color: #ef4444;
+}
+
+.tree-node-icon.pending {
+  color: #9ca3af;
+}
+
+.tree-node-content {
+  flex: 1;
+}
+
+.tree-node.active {
+  background: var(--color-bg-1);
+  padding: var(--space-6);
+  border-radius: var(--radius-sm);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.tree-node.dimmed {
+  opacity: 0.4;
+}
+
+.tree-node-details {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-4);
+}
+
+/* Comparison Section */
+.comparison {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-16);
+  margin-bottom: var(--space-16);
+}
+
+@media (max-width: 768px) {
+  .comparison {
+    grid-template-columns: 1fr;
+  }
+}
+
+.comparison-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.comparison-header {
+  padding: var(--space-12) var(--space-16);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-base);
+  border-bottom: 1px solid var(--color-card-border-inner);
+}
+
+.comparison-header.traditional {
+  background: #fff5f5;
+  color: #d1242f;
+}
+
+@media (prefers-color-scheme: dark) {
+  .comparison-header.traditional {
+    background: rgba(248, 81, 73, 0.15);
+    color: #ff7b72;
+  }
+}
+
+.comparison-header.predicate {
+  background: #dafbe1;
+  color: #1a7f37;
+}
+
+@media (prefers-color-scheme: dark) {
+  .comparison-header.predicate {
+    background: rgba(46, 160, 67, 0.15);
+    color: #3fb950;
+  }
+}
+
+.comparison-body {
+  padding: var(--space-16);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  max-height: 350px;
+  overflow-y: auto;
+  background: #f6f8fa;
+}
+
+@media (prefers-color-scheme: dark) {
+  .comparison-body {
+    background: #0d1117;
+  }
+}
+
+.comparison-caption {
+  text-align: center;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  color: #0969da;
+  margin-top: var(--space-16);
+}
+
+@media (prefers-color-scheme: dark) {
+  .comparison-caption {
+    color: #58a6ff;
+  }
+}
+
+/* GitHub-style badge */
+.gh-badge {
+  display: inline-block;
+  padding: var(--space-2) var(--space-8);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  background: #dafbe1;
+  color: #1a7f37;
+  border: 1px solid rgba(27, 31, 36, 0.15);
+}
+
+@media (prefers-color-scheme: dark) {
+  .gh-badge {
+    background: rgba(46, 160, 67, 0.15);
+    color: #3fb950;
+  }
+}
+
+/* Playground */
+.playground {
+  background: var(--color-surface);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-24);
+  box-shadow: 0 1px 3px rgba(27, 31, 36, 0.12);
+}
+
+.form-group {
+  margin-bottom: var(--space-16);
+}
+
+.form-label {
+  display: block;
+  margin-bottom: var(--space-8);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+}
+
+.predicate-list {
+  margin-bottom: var(--space-16);
+}
+
+.predicate-item {
+  display: flex;
+  gap: var(--space-12);
+  align-items: center;
+  padding: var(--space-12);
+  background: #f6f8fa;
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-8);
+}
+
+@media (prefers-color-scheme: dark) {
+  .predicate-item {
+    background: #161b22;
+  }
+}
+
+.predicate-item input {
+  flex: 1;
+}
+
+.predicate-item select {
+  flex: 1;
+}
+
+.predicate-item button {
+  padding: var(--space-6) var(--space-12);
+  background: var(--color-secondary);
+  color: var(--color-text);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+}
+
+.predicate-item button:hover {
+  background: var(--color-secondary-hover);
+}
+
+/* Teaching Points */
+.teaching-points {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-16);
+  margin-bottom: var(--space-32);
+}
+
+.teaching-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-20);
+  box-shadow: 0 1px 3px rgba(27, 31, 36, 0.12);
+  transition: all var(--duration-fast) var(--ease-standard);
+}
+
+.teaching-card:hover {
+  box-shadow: 0 3px 8px rgba(27, 31, 36, 0.15);
+  transform: translateY(-2px);
+}
+
+.teaching-card h3 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin: 0 0 var(--space-12) 0;
+  color: #0969da;
+}
+
+@media (prefers-color-scheme: dark) {
+  .teaching-card h3 {
+    color: #58a6ff;
+  }
+}
+
+.teaching-card p {
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Footer */
+.footer {
+  padding: var(--space-32) var(--space-16);
+  border-top: 1px solid var(--color-border);
+  background: #f6f8fa;
+  margin-top: var(--space-32);
+}
+
+@media (prefers-color-scheme: dark) {
+  .footer {
+    background: #0d1117;
+  }
+}
+
+.footer-content {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-32);
+  margin-bottom: var(--space-24);
+}
+
+.footer-section h4 {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text);
+  margin: 0 0 var(--space-12) 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.footer-section a {
+  display: block;
+  color: #0969da;
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-8);
+}
+
+.footer-section a:hover {
+  text-decoration: underline;
+}
+
+.footer-section p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: var(--space-8) 0 0 0;
+  line-height: 1.5;
+}
+
+.footer-tagline {
+  font-style: italic;
+  color: var(--color-text-secondary);
+  margin-top: var(--space-4);
+}
+
+.footer-license {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+}
+
+.footer-divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: var(--space-24) 0;
+}
+
+.footer-copyright {
+  text-align: center;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.footer p {
+  margin: 0;
+}
+
+/* Breadcrumb */
+.gh-breadcrumb {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-12) 0;
+  font-size: var(--font-size-sm);
+}
+
+.gh-breadcrumb nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.gh-breadcrumb a {
+  color: #0969da;
+  text-decoration: none;
+  font-weight: var(--font-weight-semibold);
+}
+
+.gh-breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.gh-breadcrumb span {
+  color: var(--color-text-secondary);
+}
+
+.gh-breadcrumb-current {
+  color: var(--color-text);
+  font-weight: var(--font-weight-semibold);
+}
+
+@media (prefers-color-scheme: dark) {
+  .gh-breadcrumb a {
+    color: #58a6ff;
+  }
+}
+
+/* Utility */
+.text-center {
+  text-align: center;
+}
+
+.mb-24 {
+  margin-bottom: var(--space-24);
+}
+    </style>
+</head>
+<body>
+    <!-- GitHub-style Header -->
+    <header class="gh-header">
+        <div class="gh-header-content">
+            <div class="gh-header-left">
+                <span class="gh-org">theMethodolojeeOrg</span>
+                <span class="gh-separator">/</span>
+                <span class="gh-repo">Predicate-Logging</span>
+            </div>
+            <div class="gh-header-right">
+                <a href="https://methodolojee.org" target="_blank" class="gh-link">Visit Methodolojee</a>
+                <a href="https://github.com/theMethodolojeeOrg/Predicate-Logging" target="_blank" class="gh-link gh-link-primary">
+                    <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor" style="margin-right: 6px;">
+                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                    </svg>
+                    View on GitHub
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Tagline Banner -->
+    <div class="gh-tagline">
+        <p>Failure Ain't Personal, It's Evolutionary.</p>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Predicate Logging: Logs as Proof Trees</h1>
+        <h2>See exactly what failed, not just "something broke somewhere"</h2>
+        <p>Predicate logging transforms your logs from debug strings into typed, falsifiable claims about runtime state. Each log is a node in a hierarchical proof tree that shows you exactly where reality diverged from your assumptions.</p>
+    </section>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Interactive Scenario Runner -->
+        <section class="section">
+            <h2 class="section-title">Interactive Demo</h2>
+            <p class="section-subtitle">Choose a scenario and see how predicate logging reveals the exact failure point</p>
+
+            <!-- Scenario Selection -->
+            <div class="scenario-selector" id="scenarioSelector">
+                <div class="scenario-card active" data-scenario="video_player">
+                    <h3>🎥 Video Player</h3>
+                    <p>Loading and starting video playback</p>
+                </div>
+                <div class="scenario-card" data-scenario="api_request">
+                    <h3>🌐 API Request</h3>
+                    <p>Fetching user profile data from API</p>
+                </div>
+                <div class="scenario-card" data-scenario="ecommerce_order">
+                    <h3>🛒 E-commerce Order</h3>
+                    <p>Processing a customer order</p>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <button class="btn btn--primary" id="runHappyPath">✓ Run Happy Path</button>
+                <select class="form-control" id="failureSelect">
+                    <option value="">Select predicate to fail...</option>
+                </select>
+                <button class="btn btn--secondary" id="runWithFailure">✗ Run with Failure</button>
+            </div>
+
+            <!-- Output Panels -->
+            <div class="output-container">
+                <div class="output-panel">
+                    <div class="output-panel-header">Log Output (JSON)</div>
+                    <div class="output-panel-body">
+                        <div class="log-output" id="logOutput">Run a scenario to see log output...</div>
+                    </div>
+                </div>
+                <div class="output-panel">
+                    <div class="output-panel-header">Proof Tree Visualization</div>
+                    <div class="output-panel-body">
+                        <div class="proof-tree" id="proofTree">Run a scenario to see the proof tree...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Traditional vs Predicate Comparison -->
+        <section class="section">
+            <h2 class="section-title">Traditional vs Predicate Logging</h2>
+            <p class="section-subtitle">Same failure, drastically different debugging experience</p>
+
+            <div class="comparison">
+                <div class="comparison-panel">
+                    <div class="comparison-header traditional">Traditional Logging</div>
+                    <div class="comparison-body" id="traditionalLogs">
+                        <div>[2024-11-15 15:30:22] Starting video player initialization</div>
+                        <div>[2024-11-15 15:30:22] Loading player library...</div>
+                        <div>[2024-11-15 15:30:23] Library loaded</div>
+                        <div>[2024-11-15 15:30:23] Checking container...</div>
+                        <div>[2024-11-15 15:30:23] Container found</div>
+                        <div>[2024-11-15 15:30:23] Creating player instance...</div>
+                        <div>[2024-11-15 15:30:23] Player created</div>
+                        <div>[2024-11-15 15:30:23] Loading video...</div>
+                        <div style="color: #ef4444; font-weight: bold;">[2024-11-15 15:30:24] ERROR: Failed to load video</div>
+                        <div>[2024-11-15 15:30:24] Playback failed</div>
+                    </div>
+                </div>
+                <div class="comparison-panel">
+                    <div class="comparison-header predicate">Predicate Logging</div>
+                    <div class="comparison-body">
+                        <div style="color: #22c55e;">✓ player_library_loaded</div>
+                        <div style="margin-left: 20px; color: #22c55e;">✓ player_container_exists</div>
+                        <div style="margin-left: 40px; color: #22c55e;">✓ player_instance_created</div>
+                        <div style="margin-left: 60px; color: #ef4444; font-weight: bold;">✗ video_url_valid</div>
+                        <div style="margin-left: 80px; color: #9ca3af; font-style: italic;">→ (url: undefined - URL not provided!)</div>
+                        <div style="margin-left: 80px; color: #9ca3af; opacity: 0.5;">video_metadata_loaded (not executed)</div>
+                        <div style="margin-left: 100px; color: #9ca3af; opacity: 0.5;">playback_started (not executed)</div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="comparison-caption">Which one tells you exactly what to fix?</p>
+        </section>
+
+        <!-- Teaching Points -->
+        <section class="section">
+            <h2 class="section-title">Key Concepts</h2>
+            <div class="teaching-points">
+                <div class="teaching-card">
+                    <h3>The Catastrophic 200 Problem</h3>
+                    <p>Traditional systems fail silently with technical success. A 200 OK response doesn't guarantee valid data, fresh data, or correct business logic. Predicate logging makes these semantic failures visible.</p>
+                </div>
+                <div class="teaching-card">
+                    <h3>Logs as Falsifiable Claims</h3>
+                    <p>Each log is a typed predicate claim about runtime state, not a debug string. You declare what SHOULD be true and log whether it actually IS true.</p>
+                </div>
+                <div class="teaching-card">
+                    <h3>Hierarchical Proof Trees</h3>
+                    <p>Child predicates only exist when parent predicates passed. The presence of a child log PROVES its parents held in this run. Failed parents stop execution, showing you exactly where reality diverged from assumptions.</p>
+                </div>
+                <div class="teaching-card">
+                    <h3>Fail-Upward Development</h3>
+                    <p>You're not trying to avoid failures - you're making them informative. Each predicate failure teaches you something specific about your system's reality vs your assumptions.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Build Your Own Playground -->
+        <section class="section">
+            <h2 class="section-title">Build Your Own</h2>
+            <p class="section-subtitle">Create custom predicates and see how they form proof trees</p>
+
+            <div class="playground">
+                <div class="form-group">
+                    <label class="form-label">Add Predicates</label>
+                    <div class="predicate-list" id="customPredicateList">
+                        <!-- Dynamic predicate items will be added here -->
+                    </div>
+                    <button class="btn btn--secondary" id="addPredicateBtn">+ Add Predicate</button>
+                </div>
+
+                <div class="form-group">
+                    <button class="btn btn--primary" id="runCustomScenario">Generate Proof Tree</button>
+                </div>
+
+                <div class="output-container">
+                    <div class="output-panel">
+                        <div class="output-panel-header">Custom Log Output</div>
+                        <div class="output-panel-body">
+                            <div class="log-output" id="customLogOutput">Add predicates and click "Generate Proof Tree"...</div>
+                        </div>
+                    </div>
+                    <div class="output-panel">
+                        <div class="output-panel-header">Custom Proof Tree</div>
+                        <div class="output-panel-body">
+                            <div class="proof-tree" id="customProofTree">Add predicates and click "Generate Proof Tree"...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Organization</h4>
+                <a href="https://methodolojee.org" target="_blank">Methodolojee</a>
+                <p class="footer-tagline">Failure Ain't Personal, It's Evolutionary.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Repository</h4>
+                <a href="https://github.com/theMethodolojeeOrg/Predicate-Logging" target="_blank">View on GitHub</a>
+                <p class="footer-license">Licensed under Apache-2.0</p>
+            </div>
+            <div class="footer-section">
+                <h4>About</h4>
+                <p>Part of the Predicate-Logging ecosystem</p>
+                <p>Making failures informative, not frustrating</p>
+            </div>
+        </div>
+        <hr class="footer-divider">
+        <p class="footer-copyright">© 2024 Methodolojee Organization • Apache-2.0 License</p>
+    </footer>
+
+    <!-- Breadcrumb -->
+    <div class="gh-breadcrumb">
+        <div class="container">
+            <nav>
+                <a href="https://github.com/theMethodolojeeOrg" target="_blank">theMethodolojeeOrg</a>
+                <span>/</span>
+                <a href="https://github.com/theMethodolojeeOrg/Predicate-Logging" target="_blank">Predicate-Logging</a>
+                <span>/</span>
+                <span class="gh-breadcrumb-current">Interactive Demo</span>
+            </nav>
+        </div>
+    </div>
+
+    <script>
+        // Scenario Data
+        const scenarios = {
+            video_player: {
+                name: "Video Player Initialization",
+                description: "Loading and starting video playback",
+                predicates: [
+                    {
+                        id: "player_library_loaded",
+                        parents: [],
+                        description: "VideoPlayer library is loaded and available",
+                        event: "video_player_library_check",
+                        scope: "infra.video"
+                    },
+                    {
+                        id: "player_container_exists",
+                        parents: ["player_library_loaded"],
+                        description: "DOM container element exists",
+                        event: "video_container_check",
+                        scope: "infra.video"
+                    },
+                    {
+                        id: "player_instance_created",
+                        parents: ["player_container_exists"],
+                        description: "VideoPlayer instance created successfully",
+                        event: "player_instance_created",
+                        scope: "domain.video"
+                    },
+                    {
+                        id: "video_url_valid",
+                        parents: ["player_instance_created"],
+                        description: "Video URL is provided and valid",
+                        event: "video_url_validated",
+                        scope: "domain.video"
+                    },
+                    {
+                        id: "video_metadata_loaded",
+                        parents: ["video_url_valid"],
+                        description: "Video metadata (duration, codec) loaded",
+                        event: "video_metadata_loaded",
+                        scope: "domain.video"
+                    },
+                    {
+                        id: "playback_started",
+                        parents: ["video_metadata_loaded"],
+                        description: "Video playback has started",
+                        event: "playback_started",
+                        scope: "domain.video"
+                    }
+                ]
+            },
+            api_request: {
+                name: "API Request",
+                description: "Fetching user profile data from API",
+                predicates: [
+                    {
+                        id: "http_request_successful",
+                        parents: [],
+                        description: "HTTP request returned 2xx status",
+                        event: "user_profile_http_success",
+                        scope: "service.api"
+                    },
+                    {
+                        id: "response_parseable",
+                        parents: ["http_request_successful"],
+                        description: "Response body is valid JSON",
+                        event: "user_profile_parsed",
+                        scope: "service.api"
+                    },
+                    {
+                        id: "user_data_present",
+                        parents: ["response_parseable"],
+                        description: "User object exists in response",
+                        event: "user_profile_data_present",
+                        scope: "domain.users"
+                    },
+                    {
+                        id: "data_is_fresh",
+                        parents: ["user_data_present"],
+                        description: "Data updated within last hour",
+                        event: "user_profile_freshness_checked",
+                        scope: "domain.users"
+                    }
+                ]
+            },
+            ecommerce_order: {
+                name: "E-commerce Order",
+                description: "Processing a customer order",
+                predicates: [
+                    {
+                        id: "order_exists",
+                        parents: [],
+                        description: "Order found in database",
+                        event: "order_fetch_complete",
+                        scope: "domain.orders"
+                    },
+                    {
+                        id: "all_items_available",
+                        parents: ["order_exists"],
+                        description: "All order items in stock",
+                        event: "inventory_check_complete",
+                        scope: "domain.inventory"
+                    },
+                    {
+                        id: "payment_successful",
+                        parents: ["all_items_available"],
+                        description: "Payment processed successfully",
+                        event: "payment_processed",
+                        scope: "domain.payments"
+                    },
+                    {
+                        id: "inventory_reserved",
+                        parents: ["payment_successful"],
+                        description: "Inventory reserved for order",
+                        event: "inventory_reserved",
+                        scope: "domain.inventory"
+                    },
+                    {
+                        id: "order_fully_processed",
+                        parents: ["inventory_reserved"],
+                        description: "Order marked as complete",
+                        event: "order_processing_complete",
+                        scope: "domain.orders"
+                    }
+                ]
+            }
+        };
+
+        // State
+        let currentScenario = 'video_player';
+        let customPredicates = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setupScenarioSelector();
+            setupControls();
+            setupPlayground();
+            updateFailureDropdown();
+        });
+
+        // Scenario Selector
+        function setupScenarioSelector() {
+            const cards = document.querySelectorAll('.scenario-card');
+            cards.forEach(card => {
+                card.addEventListener('click', () => {
+                    cards.forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    currentScenario = card.dataset.scenario;
+                    updateFailureDropdown();
+                });
+            });
+        }
+
+        // Update Failure Dropdown
+        function updateFailureDropdown() {
+            const select = document.getElementById('failureSelect');
+            const predicates = scenarios[currentScenario].predicates;
+            
+            select.innerHTML = '<option value="">Select predicate to fail...</option>';
+            predicates.forEach(pred => {
+                const option = document.createElement('option');
+                option.value = pred.id;
+                option.textContent = pred.id;
+                select.appendChild(option);
+            });
+        }
+
+        // Controls Setup
+        function setupControls() {
+            document.getElementById('runHappyPath').addEventListener('click', () => {
+                runScenario(null);
+            });
+
+            document.getElementById('runWithFailure').addEventListener('click', () => {
+                const failureId = document.getElementById('failureSelect').value;
+                if (!failureId) {
+                    alert('Please select a predicate to fail');
+                    return;
+                }
+                runScenario(failureId);
+            });
+        }
+
+        // Run Scenario
+        async function runScenario(failAt) {
+            const scenario = scenarios[currentScenario];
+            const predicates = scenario.predicates;
+            const logOutput = document.getElementById('logOutput');
+            const proofTree = document.getElementById('proofTree');
+            
+            logOutput.innerHTML = '';
+            proofTree.innerHTML = '';
+
+            const results = [];
+            const correlationId = `corr_${Date.now()}`;
+            let shouldContinue = true;
+
+            for (let i = 0; i < predicates.length; i++) {
+                if (!shouldContinue) {
+                    results.push({ ...predicates[i], status: 'skipped' });
+                    continue;
+                }
+
+                // Check if parents passed
+                const parentsOk = predicates[i].parents.every(parentId => {
+                    const parentResult = results.find(r => r.id === parentId);
+                    return parentResult && parentResult.status === 'passed';
+                });
+
+                if (predicates[i].parents.length > 0 && !parentsOk) {
+                    results.push({ ...predicates[i], status: 'skipped' });
+                    continue;
+                }
+
+                // Simulate execution
+                await sleep(300);
+
+                const passed = predicates[i].id !== failAt;
+                results.push({ ...predicates[i], status: passed ? 'passed' : 'failed' });
+
+                // Add to log output
+                const logLine = createLogLine(predicates[i], passed, correlationId);
+                const logDiv = document.createElement('div');
+                logDiv.className = 'log-line';
+                logDiv.textContent = JSON.stringify(logLine, null, 2);
+                logOutput.appendChild(logDiv);
+
+                if (!passed) {
+                    shouldContinue = false;
+                }
+            }
+
+            // Build proof tree
+            buildProofTree(results, proofTree);
+        }
+
+        // Create Log Line
+        function createLogLine(predicate, passed, correlationId) {
+            return {
+                timestamp: new Date().toISOString(),
+                correlation_id: correlationId,
+                event: predicate.event,
+                scope: predicate.scope,
+                predicate: predicate.id,
+                passed: passed,
+                description: predicate.description,
+                parents: predicate.parents,
+                metadata: passed ? {} : { reason: 'Simulated failure', url: 'undefined' }
+            };
+        }
+
+        // Build Proof Tree
+        function buildProofTree(results, container) {
+            const getDepth = (pred) => {
+                if (pred.parents.length === 0) return 0;
+                const parent = results.find(p => p.id === pred.parents[0]);
+                return parent ? getDepth(parent) + 1 : 0;
+            };
+
+            results.forEach(pred => {
+                const depth = getDepth(pred);
+                const node = document.createElement('div');
+                node.className = 'tree-node';
+                
+                if (pred.status === 'skipped') {
+                    node.classList.add('dimmed');
+                }
+
+                let indent = '';
+                for (let i = 0; i < depth; i++) {
+                    indent += '<span class="tree-node-indent"></span>';
+                }
+
+                let icon = '○';
+                let iconClass = 'pending';
+                if (pred.status === 'passed') {
+                    icon = '✓';
+                    iconClass = 'success';
+                } else if (pred.status === 'failed') {
+                    icon = '✗';
+                    iconClass = 'failure';
+                }
+
+                node.innerHTML = `
+                    ${indent}
+                    <span class="tree-node-icon ${iconClass}">${icon}</span>
+                    <div class="tree-node-content">
+                        <strong>${pred.id}</strong>
+                        <div class="tree-node-details">${pred.description}</div>
+                        ${pred.status === 'failed' ? '<div class="tree-node-details" style="color: #ef4444;">→ Simulated failure: url undefined</div>' : ''}
+                        ${pred.status === 'skipped' ? '<div class="tree-node-details">(not executed - parent failed)</div>' : ''}
+                    </div>
+                `;
+
+                container.appendChild(node);
+            });
+        }
+
+        // Playground Setup
+        function setupPlayground() {
+            document.getElementById('addPredicateBtn').addEventListener('click', addCustomPredicate);
+            document.getElementById('runCustomScenario').addEventListener('click', runCustomScenario);
+            
+            // Add initial predicate
+            addCustomPredicate();
+        }
+
+        // Add Custom Predicate
+        function addCustomPredicate() {
+            const list = document.getElementById('customPredicateList');
+            const index = customPredicates.length;
+            
+            const item = document.createElement('div');
+            item.className = 'predicate-item';
+            item.innerHTML = `
+                <input type="text" class="form-control" placeholder="Predicate name" data-index="${index}" data-field="name">
+                <select class="form-control" data-index="${index}" data-field="parent">
+                    <option value="">No parent</option>
+                </select>
+                <select class="form-control" data-index="${index}" data-field="status">
+                    <option value="pass">✓ Pass</option>
+                    <option value="fail">✗ Fail</option>
+                </select>
+                <button onclick="removeCustomPredicate(${index})">Remove</button>
+            `;
+            
+            list.appendChild(item);
+            customPredicates.push({ name: '', parent: '', status: 'pass' });
+            
+            updateParentDropdowns();
+        }
+
+        // Remove Custom Predicate
+        window.removeCustomPredicate = function(index) {
+            customPredicates.splice(index, 1);
+            renderCustomPredicates();
+        };
+
+        // Update Parent Dropdowns
+        function updateParentDropdowns() {
+            const selects = document.querySelectorAll('#customPredicateList select[data-field="parent"]');
+            selects.forEach(select => {
+                const currentIndex = parseInt(select.dataset.index);
+                const currentValue = select.value;
+                
+                select.innerHTML = '<option value="">No parent</option>';
+                
+                customPredicates.forEach((pred, i) => {
+                    if (i < currentIndex && pred.name) {
+                        const option = document.createElement('option');
+                        option.value = pred.name;
+                        option.textContent = pred.name;
+                        if (currentValue === pred.name) {
+                            option.selected = true;
+                        }
+                        select.appendChild(option);
+                    }
+                });
+            });
+        }
+
+        // Render Custom Predicates
+        function renderCustomPredicates() {
+            const list = document.getElementById('customPredicateList');
+            list.innerHTML = '';
+            
+            const tempPredicates = [...customPredicates];
+            customPredicates = [];
+            
+            tempPredicates.forEach(pred => {
+                const index = customPredicates.length;
+                const item = document.createElement('div');
+                item.className = 'predicate-item';
+                item.innerHTML = `
+                    <input type="text" class="form-control" placeholder="Predicate name" data-index="${index}" data-field="name" value="${pred.name}">
+                    <select class="form-control" data-index="${index}" data-field="parent">
+                        <option value="">No parent</option>
+                    </select>
+                    <select class="form-control" data-index="${index}" data-field="status">
+                        <option value="pass" ${pred.status === 'pass' ? 'selected' : ''}>✓ Pass</option>
+                        <option value="fail" ${pred.status === 'fail' ? 'selected' : ''}>✗ Fail</option>
+                    </select>
+                    <button onclick="removeCustomPredicate(${index})">Remove</button>
+                `;
+                
+                list.appendChild(item);
+                customPredicates.push(pred);
+            });
+            
+            updateParentDropdowns();
+            
+            // Restore parent values
+            tempPredicates.forEach((pred, i) => {
+                const select = document.querySelector(`select[data-index="${i}"][data-field="parent"]`);
+                if (select && pred.parent) {
+                    select.value = pred.parent;
+                }
+            });
+        }
+
+        // Handle input changes
+        document.addEventListener('input', (e) => {
+            if (e.target.matches('#customPredicateList input, #customPredicateList select')) {
+                const index = parseInt(e.target.dataset.index);
+                const field = e.target.dataset.field;
+                
+                if (customPredicates[index]) {
+                    customPredicates[index][field] = e.target.value;
+                    
+                    if (field === 'name') {
+                        updateParentDropdowns();
+                    }
+                }
+            }
+        });
+
+        // Run Custom Scenario
+        async function runCustomScenario() {
+            const validPredicates = customPredicates.filter(p => p.name.trim());
+            
+            if (validPredicates.length === 0) {
+                alert('Please add at least one predicate with a name');
+                return;
+            }
+
+            const logOutput = document.getElementById('customLogOutput');
+            const proofTree = document.getElementById('customProofTree');
+            
+            logOutput.innerHTML = '';
+            proofTree.innerHTML = '';
+
+            const results = [];
+            const correlationId = `custom_${Date.now()}`;
+
+            for (let i = 0; i < validPredicates.length; i++) {
+                const pred = validPredicates[i];
+                
+                // Check if parent passed
+                let shouldExecute = true;
+                if (pred.parent) {
+                    const parentResult = results.find(r => r.name === pred.parent);
+                    shouldExecute = parentResult && parentResult.status === 'passed';
+                }
+
+                await sleep(200);
+
+                const status = shouldExecute ? (pred.status === 'pass' ? 'passed' : 'failed') : 'skipped';
+                results.push({ ...pred, status });
+
+                // Add to log output
+                if (status !== 'skipped') {
+                    const logLine = {
+                        timestamp: new Date().toISOString(),
+                        correlation_id: correlationId,
+                        predicate: pred.name,
+                        passed: status === 'passed',
+                        parent: pred.parent || null
+                    };
+                    
+                    const logDiv = document.createElement('div');
+                    logDiv.className = 'log-line';
+                    logDiv.textContent = JSON.stringify(logLine, null, 2);
+                    logOutput.appendChild(logDiv);
+                }
+            }
+
+            // Build proof tree
+            buildCustomProofTree(results, proofTree);
+        }
+
+        // Build Custom Proof Tree
+        function buildCustomProofTree(results, container) {
+            const getDepth = (pred) => {
+                if (!pred.parent) return 0;
+                const parent = results.find(p => p.name === pred.parent);
+                return parent ? getDepth(parent) + 1 : 0;
+            };
+
+            results.forEach(pred => {
+                const depth = getDepth(pred);
+                const node = document.createElement('div');
+                node.className = 'tree-node';
+                
+                if (pred.status === 'skipped') {
+                    node.classList.add('dimmed');
+                }
+
+                let indent = '';
+                for (let i = 0; i < depth; i++) {
+                    indent += '<span class="tree-node-indent"></span>';
+                }
+
+                let icon = '○';
+                let iconClass = 'pending';
+                if (pred.status === 'passed') {
+                    icon = '✓';
+                    iconClass = 'success';
+                } else if (pred.status === 'failed') {
+                    icon = '✗';
+                    iconClass = 'failure';
+                }
+
+                node.innerHTML = `
+                    ${indent}
+                    <span class="tree-node-icon ${iconClass}">${icon}</span>
+                    <div class="tree-node-content">
+                        <strong>${pred.name}</strong>
+                        ${pred.status === 'skipped' ? '<div class="tree-node-details">(not executed - parent failed)</div>' : ''}
+                    </div>
+                `;
+
+                container.appendChild(node);
+            });
+        }
+
+        // Utility
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
+</html>
